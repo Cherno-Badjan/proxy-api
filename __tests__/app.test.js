@@ -1,65 +1,83 @@
 require('dotenv').config();
-
-const { execSync } = require('child_process');
+const { formatLocation, mungeWeather, mungeReview } = require('../lib/munge-functions.js');
 
 const fakeRequest = require('supertest');
 const app = require('../lib/app');
-const client = require('../lib/client');
+
 
 describe('app routes', () => {
   describe('routes', () => {
     let token;
-  
-    beforeAll(async done => {
-      execSync('npm run setup-db');
-  
-      client.connect();
-  
-      const signInData = await fakeRequest(app)
-        .post('/auth/signup')
-        .send({
-          email: 'jon@user.com',
-          password: '1234'
-        });
-      
-      token = signInData.body.token; // eslint-disable-line
-  
-      return done();
-    });
-  
-    afterAll(done => {
-      return client.end(done);
-    });
 
-    test('returns animals', async() => {
 
-      const expectation = [
-        {
-          'id': 1,
-          'name': 'bessie',
-          'coolfactor': 3,
-          'owner_id': 1
-        },
-        {
-          'id': 2,
-          'name': 'jumpy',
-          'coolfactor': 4,
-          'owner_id': 1
-        },
-        {
-          'id': 3,
-          'name': 'spot',
-          'coolfactor': 10,
-          'owner_id': 1
-        }
-      ];
+    test('returns animals', async () => {
 
-      const data = await fakeRequest(app)
-        .get('/animals')
-        .expect('Content-Type', /json/)
-        .expect(200);
+      const expectation = [{
+        name: 'Luc Lac',
+        image_url: 'https://s3-media1.fl.yelpcdn.com/bphoto/azr6sD6VeJbdaiO2aKvSsw/o.jpg',
+        price: '$$',
+        rating: 4.0,
+        url: 'https://www.yelp.com/biz/luc-lac-portland-7?adjust_creative=W4-fw5orI81WMg21PQOASQ&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_search&utm_source=W4-fw5orI81WMg21PQOASQ',
+      }];
 
-      expect(data.body).toEqual(expectation);
+      const actualData = {
+        businesses: [
+          {
+            "id": "Ys42wLKqrflqmtqkgqOXgA",
+            "alias": "luc-lac-portland-7",
+            "name": "Luc Lac",
+            "image_url": "https://s3-media1.fl.yelpcdn.com/bphoto/azr6sD6VeJbdaiO2aKvSsw/o.jpg",
+            "is_closed": false,
+            "url": "https://www.yelp.com/biz/luc-lac-portland-7?adjust_creative=W4-fw5orI81WMg21PQOASQ&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_search&utm_source=W4-fw5orI81WMg21PQOASQ",
+            "review_count": 3205,
+            "categories": [
+              {
+                "alias": "vietnamese",
+                "title": "Vietnamese"
+              },
+              {
+                "alias": "tapasmallplates",
+                "title": "Tapas/Small Plates"
+              },
+              {
+                "alias": "cocktailbars",
+                "title": "Cocktail Bars"
+              }
+            ],
+            "rating": 4.0,
+            "coordinates": {
+              "latitude": 45.516868,
+              "longitude": -122.675447
+            },
+            "transactions": [
+              "delivery",
+              "pickup"
+            ],
+            "price": "$$",
+            "location": {
+              "address1": "835 SW 2nd Ave",
+              "address2": null,
+              "address3": "",
+              "city": "Portland",
+              "zip_code": "97204",
+              "country": "US",
+              "state": "OR",
+              "display_address": [
+                "835 SW 2nd Ave",
+                "Portland, OR 97204"
+              ]
+            },
+            "phone": "+15032220047",
+            "display_phone": "(503) 222-0047",
+            "distance": 1312.1776320869053
+          }
+        ]
+      };
+
+      const actual = mungeReview(actualData);
+
+
+      expect(actual).toEqual(expectation);
     });
   });
 });
