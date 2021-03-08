@@ -1,8 +1,6 @@
 require('dotenv').config();
 const { formatLocation, mungeWeather, mungeReview } = require('../lib/munge-functions.js');
 
-const fakeRequest = require('supertest');
-const app = require('../lib/app');
 
 
 describe('app routes', () => {
